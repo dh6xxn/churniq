@@ -16,5 +16,3 @@ dependencies = [
 [tool.vercel]
 entrypoint = "backend.main:app"
 
-[tool.vercel.scripts]
-build = "python backend/train_model.py"
