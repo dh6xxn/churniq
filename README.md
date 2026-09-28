@@ -1,75 +1,172 @@
+<div align="center">
+
 # ChurnIQ
 
-> Customer churn prediction and bulk risk analysis powered by an Artificial Neural Network.
+### Customer Churn Prediction & Risk Intelligence
 
-ChurnIQ turns a trained ANN/MLP churn model into a usable web application. It supports both **single-customer prediction** and **CSV-based bulk analysis**, so you can upload a customer dataset and quickly identify the customers with the highest predicted churn probability.
+Predict churn probability for individual customers or analyze an entire customer dataset with an Artificial Neural Network.
 
-## Features
+<p>
+  <img src="https://img.shields.io/badge/Model-ANN%20%7C%20MLP-111827?style=for-the-badge" alt="ANN">
+  <img src="https://img.shields.io/badge/API-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/Accuracy-85.95%25-16a34a?style=for-the-badge" alt="Accuracy">
+  <img src="https://img.shields.io/badge/License-AGPL--3.0-blue?style=for-the-badge" alt="AGPL-3.0">
+</p>
 
-- Individual customer churn prediction
-- CSV dataset upload and bulk prediction
-- Automatic CSV validation
-- Churn probability for every customer
+**Single prediction · Bulk CSV analysis · Risk ranking · REST API**
+
+</div>
+
+---
+
+## What is ChurnIQ?
+
+**ChurnIQ** is a full-stack customer churn prediction application that turns an ANN/MLP model into an interactive analytics tool.
+
+It supports two workflows:
+
+| Workflow | What it does |
+|---|---|
+| 👤 **Single Prediction** | Enter one customer profile and receive a churn probability and risk level |
+| 📊 **Dataset Analysis** | Upload a CSV, score every valid customer, rank the highest-risk customers and export results |
+
+The goal is simple: **turn customer data into a clear risk signal that can be explored through a web interface.**
+
+## ✨ Features
+
+- Individual churn prediction
+- CSV bulk prediction
+- Automatic dataset validation
+- Churn probability for every valid customer
 - Low / Medium / High risk bands
 - Highest-risk customer ranking
-- Downloadable prediction results
-- Model performance dashboard
+- Dataset summary statistics
+- Downloadable prediction CSV
 - FastAPI REST API
-- Responsive frontend
-- Correct train/test preprocessing without test-set leakage
+- Responsive web interface
+- ANN/MLP model with **16 → 8 → 1** architecture
+- Train/test preprocessing without test-set leakage
+- Model metrics displayed in the application
+
+---
 
 ## How it works
 
-```
-Customer data
-    │
-    ├── Single customer ──► validation ──► preprocessing ──► ANN ──► risk
-    │
-    └── CSV dataset ──────► validation ──► preprocessing ──► ANN ──► ranked results
-```
+~~~text
+                         CHURNIQ
 
-The model uses an MLP/ANN architecture equivalent to:
+       ┌─────────────────────────────────────┐
+       │          Customer Data              │
+       └──────────────────┬──────────────────┘
+                          │
+              ┌───────────┴───────────┐
+              │                       │
+              ▼                       ▼
+       Single Customer          CSV Dataset
+              │                       │
+              └───────────┬───────────┘
+                          ▼
+                  Input Validation
+                          │
+                          ▼
+                Feature Preprocessing
+                          │
+                          ▼
+                    ANN / MLP
+                    16 → 8 → 1
+                          │
+                          ▼
+                 Churn Probability
+                          │
+                 ┌────────┴────────┐
+                 ▼                 ▼
+            Risk Level        Prediction
+          Low / Medium /       Churn / Stay
+               High
+~~~
 
-```
-Input
-  ↓
-16 neurons — ReLU
-  ↓
-8 neurons — ReLU
-  ↓
-1 neuron — binary classification
-```
+The runnable application uses scikit-learn MLPClassifier. The TensorFlow/Keras implementation of the same architecture is included in backend/train_keras.py.
 
-The runnable application uses scikit-learn's `MLPClassifier`. `backend/train_keras.py` contains the TensorFlow/Keras implementation of the same 16 → 8 → 1 architecture.
+## 📊 Model
 
-## Model features
+### Architecture
 
-| Feature | Description |
-|---|---|
-| CreditScore | Customer credit score |
-| Geography | France, Germany or Spain |
-| Gender | Male or Female |
-| Age | Customer age |
-| Tenure | Years with the institution |
-| Balance | Account balance |
-| NumOfProducts | Number of products held |
-| HasCrCard | Credit-card ownership |
-| IsActiveMember | Customer activity status |
-| EstimatedSalary | Estimated salary |
+~~~text
+Input Features
+      │
+      ▼
+┌──────────────────┐
+│ Dense: 16        │
+│ Activation: ReLU │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│ Dense: 8         │
+│ Activation: ReLU │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│ Dense: 1         │
+│ Binary output    │
+└──────────────────┘
+~~~
 
-Identifier columns such as `CustomerId`, `Surname`, and `RowNumber` may be retained in an uploaded CSV for identification, but they are not model features.
+### Preprocessing
 
-### How feature changes affect risk
+1. Split the dataset into training and test sets.
+2. Fit preprocessing only on training data.
+3. One-hot encode categorical features.
+4. Standardize numerical features.
+5. Train the ANN/MLP.
+6. Evaluate against the untouched test set.
 
-The ANN learns relationships between the features rather than applying simple fixed rules. A change to Age, Balance, Geography, activity, product count, or another input can therefore change the predicted probability depending on the complete customer profile.
+This prevents test-set information from leaking into preprocessing.
 
-A prediction change is **not a causal conclusion**. For example, if changing one field changes the probability, that does not prove that the field caused churn. Feature-attribution methods such as SHAP can be added when causal/interpretability analysis is required.
+## Input features
 
-## Bulk CSV analysis
+| Feature | Type | Description |
+|:--|:--:|:--|
+| CreditScore | Numeric | Customer credit score |
+| Geography | Categorical | France, Germany or Spain |
+| Gender | Categorical | Male or Female |
+| Age | Numeric | Customer age |
+| Tenure | Numeric | Years with the institution |
+| Balance | Numeric | Account balance |
+| NumOfProducts | Numeric | Number of products held |
+| HasCrCard | Binary | Credit-card ownership |
+| IsActiveMember | Binary | Customer activity status |
+| EstimatedSalary | Numeric | Estimated salary |
 
-Open **Dataset Analysis** and upload a CSV containing these required fields:
+Identifier fields such as CustomerId, Surname and RowNumber can be present in uploaded files for identification, but they are not model inputs.
 
-```text
+## Understanding feature changes
+
+The ANN learns relationships between the input variables rather than applying fixed rules. A change to Age, Balance, Geography, activity, product count or another input can therefore change the predicted probability depending on the complete customer profile.
+
+- **Age** contributes to the learned churn pattern across customer profiles.
+- **Geography** allows the model to learn regional differences in the training data.
+- **NumOfProducts** captures product relationship depth.
+- **IsActiveMember** provides an engagement signal.
+- **Balance** provides account-level information.
+- **Tenure** captures relationship duration.
+- **CreditScore** provides a credit-profile signal.
+- **EstimatedSalary** provides an income-related signal.
+- **HasCrCard** and **Gender** provide additional binary/categorical information.
+
+> A change in predicted probability is **not proof of causation**. For detailed feature attribution, SHAP or another explainability method can be added.
+
+---
+
+# 📊 Dataset Analysis
+
+Upload a customer CSV and analyze the entire dataset at once.
+
+### Required columns
+
+~~~text
 CreditScore
 Geography
 Gender
@@ -80,150 +177,210 @@ NumOfProducts
 HasCrCard
 IsActiveMember
 EstimatedSalary
-```
+~~~
 
-Optional identifier fields:
+### Optional identifier columns
 
-```text
+~~~text
 CustomerId
 Surname
 RowNumber
-```
+~~~
 
-ChurnIQ will:
+### Processing pipeline
 
-1. Read the CSV.
-2. Validate required columns and values.
-3. Report invalid rows instead of silently accepting bad data.
-4. Generate a churn probability for every valid row.
-5. Assign a Low, Medium or High risk band.
-6. Sort customers by predicted churn probability.
-7. Show summary counts and high-risk customers.
-8. Let you download the complete prediction CSV.
+~~~text
+CSV Upload → Validation → Valid / Invalid Rows → Prediction → Risk → Ranking → Export
+~~~
 
-The output adds:
+ChurnIQ reports total rows, valid rows, invalid rows, predicted churn, risk distribution and average churn probability. The interface also shows the highest-risk customers first.
 
-```text
+### Output
+
+The exported prediction file adds:
+
+~~~text
 ChurnProbability
-ChurnPercentage
 Prediction
 Risk
-```
+~~~
 
-**The uploaded customer data is processed by the running application and is not included in this repository.**
+| Customer | Probability | Risk | Prediction |
+|:--|--:|:--:|:--|
+| Customer A | 87.40% | High | Churn |
+| Customer B | 72.15% | High | Churn |
+| Customer C | 41.80% | Medium | Stay |
+| Customer D | 8.62% | Low | Stay |
 
-## Evaluation
+> The probability is a model estimate, not a guarantee that a customer will churn.
+
+## 📈 Model performance
 
 Current held-out test-set results:
 
 | Metric | Result |
-|---|---:|
-| Accuracy | 85.95% |
-| Churn precision | 76.92% |
-| Churn recall | 44.23% |
+|:--|--:|
+| **Accuracy** | **85.95%** |
+| Churn Precision | 76.92% |
+| Churn Recall | 44.23% |
 | Churn F1 | 56.16% |
-| Training records | 8,000 |
-| Test records | 2,000 |
+| Training Samples | 8,000 |
+| Test Samples | 2,000 |
 
-Confusion matrix:
+### Confusion matrix
 
-```
-                 Predicted
-               Non-churn  Churn
-Actual Non       1539       54
-Actual Churn      227      180
-```
+~~~text
+                    Predicted
+                 Non-churn   Churn
+Actual Non          1539       54
+Actual Churn         227      180
+~~~
 
-The default classification threshold is **50%**. The probability is more informative than the binary class when prioritising customers for review.
+The default binary classification threshold is **50%**. Because churn recall is lower than overall accuracy, probability and risk should be considered alongside the binary prediction.
 
-## API
+## 🔌 API
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/health` | API/model health |
-| GET | `/api/model-info` | Model metrics |
-| POST | `/api/predict` | Single-customer prediction |
-| POST | `/api/predict-csv` | Bulk CSV prediction |
+| Method | Endpoint | Purpose |
+|:--:|:--|:--|
+| GET | /api/health | API and model health |
+| GET | /api/model-info | Model metrics and metadata |
+| POST | /api/predict | Predict one customer |
+| POST | /api/predict-csv | Analyze a CSV dataset |
+| POST | /api/predict-csv/download | Download scored CSV |
 
-## Run locally
+### Example request
+
+~~~json
+{
+  "CreditScore": 650,
+  "Geography": "France",
+  "Gender": "Male",
+  "Age": 35,
+  "Tenure": 5,
+  "Balance": 75000,
+  "NumOfProducts": 1,
+  "HasCrCard": 1,
+  "IsActiveMember": 1,
+  "EstimatedSalary": 100000
+}
+~~~
+
+---
+
+# 🚀 Quick Start
+
+### Requirements
+
+- Python 3.10+
+- pip
+- Git
 
 ### 1. Clone
 
-```bash
+~~~bash
 git clone https://github.com/dh6xxn/churniq.git
 cd churniq
-```
+~~~
 
-### 2. Create an environment
+### 2. Create a virtual environment
 
-Windows:
+**Windows**
 
-```powershell
+~~~powershell
 python -m venv .venv
 .venv\Scripts\activate
-```
+~~~
 
-macOS/Linux:
+**macOS / Linux**
 
-```bash
+~~~bash
 python -m venv .venv
 source .venv/bin/activate
-```
+~~~
 
 ### 3. Install dependencies
 
-```bash
+~~~bash
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-```
+~~~
 
 ### 4. Start
 
-```bash
+~~~bash
 python -m uvicorn backend.main:app --reload
-```
+~~~
 
-Open **http://127.0.0.1:8000**
+Open **http://127.0.0.1:8000**.
 
-### Retrain
+### Retrain the model
 
-Put `Churn_Modelling.csv` in `data/` and run:
+Place Churn_Modelling.csv in data/ and run:
 
-```bash
+~~~bash
 python backend/train_model.py
-```
+~~~
 
 The raw dataset is intentionally not tracked by Git.
 
-## Project structure
+## 🗂️ Project structure
 
-```text
+~~~text
 churniq/
 ├── backend/
-│   ├── main.py
-│   ├── train_model.py
-│   ├── train_keras.py
+│   ├── main.py                 # FastAPI application
+│   ├── train_model.py          # scikit-learn ANN/MLP training
+│   ├── train_keras.py          # TensorFlow/Keras implementation
 │   └── model/
-│       └── metrics.json
+│       └── metrics.json        # Evaluation metrics
 ├── frontend/
-│   ├── index.html
-│   ├── app.js
-│   └── styles.css
+│   ├── index.html              # Application UI
+│   ├── app.js                  # Frontend logic
+│   └── styles.css              # UI styling
 ├── data/
 │   └── README.md
 ├── LICENSE
 ├── README.md
 └── requirements.txt
-```
+~~~
 
-## Limitations
+## 🔐 Data & privacy
+
+ChurnIQ is designed to run locally. Uploaded CSV data is processed by the running application and is not committed to this repository.
+
+Do not upload sensitive production customer information to an environment unless that deployment has been appropriately secured and approved for the data.
+
+## ⚠️ Limitations
 
 - The model was trained on a single churn dataset.
-- Risk bands are application-level categories, not separate trained classes.
-- A 50% threshold is used for the binary prediction.
-- Model probability is an estimate, not certainty.
-- The application is not a substitute for validated production retention systems.
-- Production use should add authentication, access control, monitoring, model versioning, drift checks, privacy controls and threshold validation.
+- Risk bands are application-level categories, not separately trained classes.
+- The default classification threshold is 50%.
+- A probability is an estimate, not certainty.
+- Model associations should not automatically be interpreted as causal relationships.
+- Production use requires additional validation and monitoring.
 
-## License
+For production deployments, consider authentication, authorization, rate limiting, model versioning, drift monitoring, audit logging, privacy controls and business-specific threshold calibration.
 
-ChurnIQ is released under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. See [LICENSE](LICENSE).
+## 🛠️ Roadmap
+
+- [ ] SHAP-based explanations
+- [ ] Interactive feature sensitivity analysis
+- [ ] Threshold tuning
+- [ ] ROC-AUC / PR-AUC reporting
+- [ ] Model comparison
+- [ ] Prediction history
+- [ ] Advanced dataset visualizations
+- [ ] Authentication and user management
+- [ ] Production deployment
+
+---
+
+<div align="center">
+
+### ChurnIQ
+
+**Turn customer data into churn-risk intelligence.**
+
+Licensed under **AGPL-3.0**
+
+</div>
