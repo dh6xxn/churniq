@@ -6,5 +6,6 @@ __pycache__/
 *.csv
 !data/README.md
 *.joblib
+!backend/model/churn_ann.joblib
 *.keras
 .DS_Store
