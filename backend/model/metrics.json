@@ -1,13 +1,26 @@
 {
   "model": "Artificial Neural Network (MLP)",
-  "architecture": [16, 8, 1],
+  "architecture": [
+    16,
+    8,
+    1
+  ],
   "test_size": 0.2,
   "random_state": 42,
   "samples": 10000,
   "train_samples": 8000,
   "test_samples": 2000,
   "accuracy": 0.8595,
-  "confusion_matrix": [[1539, 54], [227, 180]],
+  "confusion_matrix": [
+    [
+      1539,
+      54
+    ],
+    [
+      227,
+      180
+    ]
+  ],
   "precision_churn": 0.7692307692307693,
   "recall_churn": 0.44226044226044225,
   "f1_churn": 0.5616224648985959,
