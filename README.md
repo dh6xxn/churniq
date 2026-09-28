@@ -313,6 +313,9 @@ python -m uvicorn backend.main:app --reload
 
 Open **http://127.0.0.1:8000**.
 
+> **Windows note:** If `uvicorn` is reported as “not recognized”, do not run `uvicorn ...` directly. Run `python -m uvicorn backend.main:app --reload` from the activated virtual environment. If you installed dependencies without activating `.venv`, activate it first with `.venv\\Scripts\\activate`, then run `python -m pip install -r requirements.txt`.
+
+
 ### Retrain the model
 
 Place Churn_Modelling.csv in data/ and run:
