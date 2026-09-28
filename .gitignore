@@ -2,5 +2,9 @@ __pycache__/
 *.pyc
 .venv/
 .env
-.DS_Store
 *.log
+*.csv
+!data/README.md
+*.joblib
+*.keras
+.DS_Store
