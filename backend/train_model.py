@@ -2,6 +2,7 @@ from pathlib import Path
 import json
 import joblib
 import pandas as pd
+import urllib.request
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
@@ -19,6 +20,9 @@ NUMERIC = ["CreditScore","Age","Tenure","Balance","NumOfProducts","HasCrCard","I
 CATEGORICAL = ["Geography","Gender"]
 
 def main():
+    if not DATA.exists():
+        DATA.parent.mkdir(parents=True, exist_ok=True)
+        urllib.request.urlretrieve("https://raw.githubusercontent.com/selva86/datasets/master/Churn_Modelling.csv", DATA)
     df = pd.read_csv(DATA)
     X = df[FEATURES].copy()
     y = df["Exited"].astype(int)
